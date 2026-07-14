@@ -28,10 +28,44 @@ export default async function ProyectoPage() {
     redirect('/login')
   }
 
+  // Buscar el contacto vinculado a este usuario, y su proyecto
+  const { data: contacto, error } = await supabase
+    .from('contactos')
+    .select('correo, proyectos(id, nombre, fecha_limite_acceso)')
+    .eq('auth_user_id', user.id)
+    .single()
+
+   if (error || !contacto) {
+    return (
+      <div style={{ maxWidth: '600px', margin: '80px auto', padding: '20px' }}>
+        <h1>Sin proyecto asignado</h1>
+        <p>Tu cuenta no tiene ningún proyecto vinculado todavía. Contacta al desarrollador.</p>
+      </div>
+    )
+  }
+
+  const proyecto = Array.isArray(contacto.proyectos) ? contacto.proyectos[0] : contacto.proyectos
+
   return (
-    <div style={{ maxWidth: '600px', margin: '80px auto', padding: '20px' }}>
-      <h1>Bienvenido al proyecto</h1>
-      <p>Sesión iniciada como: {user.email}</p>
+    <div style={{ maxWidth: '600px', margin: '80px auto', padding: '20px', position: 'relative' }}>
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          textAlign: 'center',
+          color: '#999',
+          fontSize: '12px',
+        }}
+      >
+        {contacto.correo}
+      </div>
+      <h1>{proyecto?.nombre}</h1>
+      <p>Acceso vigente hasta: {proyecto?.fecha_limite_acceso}</p>
+      <p style={{ marginTop: '40px', color: '#666' }}>
+        Aquí se mostrará el desarrollo del proyecto (staging embebido).
+      </p>
     </div>
   )
 }
