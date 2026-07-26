@@ -17,19 +17,32 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data: authData, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
 
-    setLoading(false)
-
-    if (error) {
+    if (error || !authData.user) {
+      setLoading(false)
       setError('Correo o contraseña incorrectos.')
       return
     }
 
-    router.push('/proyecto')
+    // Buscar el proyecto vinculado a este contacto
+    const { data: contacto, error: contactoError } = await supabase
+      .from('contactos')
+      .select('proyecto_id')
+      .eq('auth_user_id', authData.user.id)
+      .single()
+
+    setLoading(false)
+
+    if (contactoError || !contacto) {
+      setError('Tu cuenta no tiene ningún proyecto vinculado. Contacta al desarrollador.')
+      return
+    }
+
+    router.push(`/proyecto/${contacto.proyecto_id}`)
   }
 
   return (
