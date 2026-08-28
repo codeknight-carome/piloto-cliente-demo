@@ -27,10 +27,7 @@ export default async function AdminHomePage() {
       <ul style={{ listStyle: 'none', padding: 0 }}>
         {(proyectos ?? []).map((p) => (
           <li key={p.id} style={{ marginBottom: '10px' }}>
-            
-              href={`/admin/proyecto/${p.id}`}
-              style={{ color: '#0070f3', textDecoration: 'underline' }}
-            >
+            <a href={`/admin/proyecto/${p.id}`} style={{ color: '#0070f3', textDecoration: 'underline' }}>
               {p.nombre}
             </a>
           </li>
