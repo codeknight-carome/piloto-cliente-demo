@@ -5,7 +5,6 @@ export async function middleware(request: NextRequest) {
   let response = NextResponse.next({
     request,
   })
-
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
@@ -24,12 +23,13 @@ export async function middleware(request: NextRequest) {
       },
     }
   )
-
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
-  const isProtectedRoute = request.nextUrl.pathname.startsWith('/proyecto')
+  const isProtectedRoute =
+    request.nextUrl.pathname.startsWith('/proyecto') ||
+    request.nextUrl.pathname.startsWith('/admin')
 
   if (isProtectedRoute && !user) {
     return NextResponse.redirect(new URL('/login', request.url))
@@ -39,5 +39,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/proyecto/:path*'],
+  matcher: ['/proyecto/:path*', '/admin/:path*'],
 }
