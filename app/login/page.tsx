@@ -4,6 +4,26 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '../lib/supabase'
 
+const inputStyle = {
+  width: '100%',
+  padding: '10px',
+  marginTop: '4px',
+  border: '1px solid #ccc',
+  borderRadius: '6px',
+  fontSize: '14px',
+  boxSizing: 'border-box' as const,
+}
+
+const buttonStyle = {
+  padding: '10px 20px',
+  backgroundColor: '#111',
+  color: '#fff',
+  border: 'none',
+  borderRadius: '6px',
+  cursor: 'pointer',
+  fontSize: '14px',
+}
+
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -30,7 +50,6 @@ export default function LoginPage() {
       return
     }
 
-    // ¿Es admin?
     const { data: admin } = await supabase
       .from('admins')
       .select('id')
@@ -43,7 +62,6 @@ export default function LoginPage() {
       return
     }
 
-    // Si no es admin, buscar el proyecto vinculado como contacto
     const { data: contacto, error: contactoError } = await supabase
       .from('contactos')
       .select('proyecto_id')
@@ -92,12 +110,12 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              style={{ width: '100%', padding: '8px', marginTop: '4px' }}
+              style={inputStyle}
             />
           </div>
           {error && <p style={{ color: 'red' }}>{error}</p>}
           {mensajeRecuperacion && <p style={{ color: 'green' }}>{mensajeRecuperacion}</p>}
-          <button type="submit" disabled={loading} style={{ padding: '10px 20px' }}>
+          <button type="submit" disabled={loading} style={buttonStyle}>
             {loading ? 'Enviando...' : 'Enviar enlace de recuperación'}
           </button>
         </form>
@@ -129,7 +147,7 @@ export default function LoginPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            style={{ width: '100%', padding: '8px', marginTop: '4px' }}
+            style={inputStyle}
           />
         </div>
         <div style={{ marginBottom: '12px' }}>
@@ -139,11 +157,11 @@ export default function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            style={{ width: '100%', padding: '8px', marginTop: '4px' }}
+            style={inputStyle}
           />
         </div>
         {error && <p style={{ color: 'red' }}>{error}</p>}
-        <button type="submit" disabled={loading} style={{ padding: '10px 20px' }}>
+        <button type="submit" disabled={loading} style={buttonStyle}>
           {loading ? 'Ingresando...' : 'Ingresar'}
         </button>
       </form>
