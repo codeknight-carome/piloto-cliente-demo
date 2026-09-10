@@ -78,6 +78,8 @@ export default function PanelObservaciones({
     }
   )
   const [actualizando, setActualizando] = useState<string | null>(null)
+  const [notas, setNotas] = useState<Record<string, string>>({})
+  const [generandoActa, setGenerandoActa] = useState<string | null>(null)
 
   async function handleToggle(respuestaId: string, estadoActual: 'pendiente' | 'resuelta') {
     const nuevoEstado = estadoActual === 'pendiente' ? 'resuelta' : 'pendiente'
@@ -89,6 +91,35 @@ export default function PanelObservaciones({
       alert('No se pudo actualizar el estado. Intenta de nuevo.')
     } finally {
       setActualizando(null)
+    }
+  }
+
+  async function handleGenerarActa(visitaId: string) {
+    setGenerandoActa(visitaId)
+    try {
+      const res = await fetch('/api/acta', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ visitaId, nota: notas[visitaId] ?? '' }),
+      })
+
+      if (!res.ok) {
+        throw new Error('Error al generar el acta')
+      }
+
+      const blob = await res.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `acta-${visitaId}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      window.URL.revokeObjectURL(url)
+    } catch (e) {
+      alert('No se pudo generar el acta. Intenta de nuevo.')
+    } finally {
+      setGenerandoActa(null)
     }
   }
 
@@ -165,6 +196,29 @@ export default function PanelObservaciones({
                     </div>
                   </div>
                 ))}
+              </div>
+
+              <div className="mt-6 pt-4 border-t">
+                <label className="block text-sm font-medium mb-2">
+                  Nota del desarrollador (opcional, se incluye en el acta)
+                </label>
+                <textarea
+                  className="w-full border rounded p-2 text-sm mb-3"
+                  rows={3}
+                  value={notas[visita.id] ?? ''}
+                  onChange={(e) =>
+                    setNotas((prev) => ({ ...prev, [visita.id]: e.target.value }))
+                  }
+                  placeholder="Ej: Se corrigieron los ajustes mencionados el día de hoy..."
+                />
+                <button
+                  type="button"
+                  disabled={generandoActa === visita.id}
+                  onClick={() => handleGenerarActa(visita.id)}
+                  className="px-4 py-2 rounded bg-black text-white text-sm disabled:opacity-50"
+                >
+                  {generandoActa === visita.id ? 'Generando...' : 'Generar acta (PDF)'}
+                </button>
               </div>
             </div>
           )
